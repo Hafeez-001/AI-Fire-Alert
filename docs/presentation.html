@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fire Guard AI — Presentation</title>
+  <style>
+    :root {
+      --bg: #090d16;
+      --card-bg: rgba(23, 32, 51, 0.7);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --accent: #ff4500;
+      --accent-glow: rgba(255, 69, 0, 0.35);
+      --amber: #f59e0b;
+      --blue: #38bdf8;
+      --green: #10b981;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text-main);
+      overflow: hidden;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      user-select: none;
+    }
+
+    /* Top bar */
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 18px 32px;
+      border-bottom: 1px solid var(--card-border);
+      background: rgba(9, 13, 22, 0.85);
+      backdrop-filter: blur(12px);
+      z-index: 10;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      font-size: 1.15rem;
+    }
+
+    .brand-flame {
+      color: var(--accent);
+      font-size: 1.4rem;
+      filter: drop-shadow(0 0 8px var(--accent-glow));
+    }
+
+    .slide-counter {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      font-weight: 500;
+    }
+
+    /* Slides container */
+    .deck-container {
+      position: relative;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    .slide {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      padding: 40px 60px;
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.35s ease, transform 0.35s ease;
+    }
+
+    .slide.active {
+      display: flex;
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Typography */
+    .tagline {
+      color: var(--accent);
+      text-transform: uppercase;
+      font-size: 0.85rem;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      margin-bottom: 8px;
+    }
+
+    h1 {
+      font-size: 3.2rem;
+      font-weight: 800;
+      line-height: 1.15;
+      margin-bottom: 16px;
+      background: linear-gradient(135deg, #ffffff 60%, var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    h2 {
+      font-size: 2.3rem;
+      font-weight: 700;
+      margin-bottom: 24px;
+      letter-spacing: -0.5px;
+    }
+
+    .subtitle {
+      font-size: 1.25rem;
+      color: var(--text-muted);
+      max-width: 800px;
+      line-height: 1.6;
+      margin-bottom: 32px;
+    }
+
+    /* Cards Grid */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 24px;
+      width: 100%;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      width: 100%;
+    }
+
+    .grid-4 {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+      width: 100%;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 24px;
+      backdrop-filter: blur(10px);
+      transition: all 0.2s ease;
+    }
+
+    .card:hover {
+      border-color: rgba(255, 69, 0, 0.4);
+      transform: translateY(-2px);
+    }
+
+    .card-icon {
+      font-size: 2rem;
+      margin-bottom: 14px;
+      display: inline-block;
+    }
+
+    .card-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: #fff;
+    }
+
+    .card-text {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      line-height: 1.55;
+    }
+
+    /* Diagram Block */
+    .diagram-box {
+      background: rgba(13, 20, 36, 0.9);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 24px;
+      font-family: monospace;
+      color: var(--blue);
+      line-height: 1.6;
+      font-size: 0.9rem;
+      white-space: pre;
+      overflow-x: auto;
+    }
+
+    /* Bottom Control Bar */
+    .bottom-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 32px;
+      border-top: 1px solid var(--card-border);
+      background: rgba(9, 13, 22, 0.85);
+      backdrop-filter: blur(12px);
+    }
+
+    .controls {
+      display: flex;
+      gap: 12px;
+    }
+
+    .btn {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--card-border);
+      color: var(--text-main);
+      padding: 8px 18px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .btn:hover {
+      background: rgba(255, 255, 255, 0.15);
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+
+    .btn-primary:hover {
+      background: #e03d00;
+    }
+
+    .speaker-notes-drawer {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Badges */
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .badge-alert { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.4); }
+    .badge-success { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); }
+    .badge-info { background: rgba(56, 189, 248, 0.2); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.4); }
+  </style>
+</head>
+<body>
+
+  <!-- Top Bar -->
+  <div class="top-bar">
+    <div class="brand">
+      <span class="brand-flame">🔥</span>
+      <span>FIRE GUARD AI</span>
+    </div>
+    <div class="slide-counter" id="counter">Slide 1 / 10</div>
+  </div>
+
+  <!-- Deck Slides -->
+  <div class="deck-container">
+
+    <!-- Slide 1: Title -->
+    <div class="slide active" data-notes="Welcome the audience. Introduce Fire Guard AI as a modern, deep learning-powered surveillance platform for real-time fire detection and immediate dispatch.">
+      <div class="tagline">Next-Generation Computer Vision Safety</div>
+      <h1>Fire Guard AI</h1>
+      <p class="subtitle">Autonomous Real-Time Fire Hazard Surveillance & Instant Multi-Channel Alert Dispatching</p>
+      <div class="grid-3" style="max-width: 900px; margin-top: 10px;">
+        <div class="card">
+          <div class="card-icon">⚡</div>
+          <div class="card-title">Sub-Second Detection</div>
+          <div class="card-text">Ultralytics YOLOv8 inference catches flame signatures milliseconds from ignition.</div>
+        </div>
+        <div class="card">
+          <div class="card-icon">🛡️</div>
+          <div class="card-title">Zero False Alarms</div>
+          <div class="card-text">Polygon ROI masks and multi-frame persistence ensure robust alert verification.</div>
+        </div>
+        <div class="card">
+          <div class="card-icon">📲</div>
+          <div class="card-title">Instant Dispatch</div>
+          <div class="card-text">Live WebSocket siren, photo dispatch via Telegram bot, and email reporting.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 2: Problem -->
+    <div class="slide" data-notes="Highlight that traditional smoke sensors are inherently reactive and cause massive delay in high-ceiling or open spaces.">
+      <div class="tagline">The Current Reality</div>
+      <h2>The Fatal Flaws of Traditional Fire Alarms</h2>
+      <p class="subtitle">Why legacy smoke and ionization detectors fail to prevent catastrophic fire damage:</p>
+      <div class="grid-4">
+        <div class="card">
+          <span class="badge badge-alert">Critical Delay</span>
+          <div class="card-title">Smoke Travel Lag</div>
+          <div class="card-text">Smoke takes 3 to 10 minutes to reach ceiling sensors. Flames grow exponentially within the first 3 minutes.</div>
+        </div>
+        <div class="card">
+          <span class="badge badge-alert">Blind Spots</span>
+          <div class="card-title">High Ceilings & Outdoors</div>
+          <div class="card-text">In warehouses, construction sites, and open yards, smoke dissipates into the air before triggering ceiling sensors.</div>
+        </div>
+        <div class="card">
+          <span class="badge badge-alert">Zero Context</span>
+          <div class="card-title">Zero Visual Intel</div>
+          <div class="card-text">Standard alarms emit beeps without showing first responders where the fire is, its intensity, or safe entry points.</div>
+        </div>
+        <div class="card">
+          <span class="badge badge-alert">Alarm Fatigue</span>
+          <div class="card-title">Frequent False Alarms</div>
+          <div class="card-text">Steam, dust, and insects trigger false alarms, causing personnel to ignore alerts or disable detectors.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 3: Solution -->
+    <div class="slide" data-notes="Present Fire Guard AI's proactive approach: computer vision spots flames immediately using cameras already installed.">
+      <div class="tagline">The Solution</div>
+      <h2>Vision-First Autonomous Hazard Surveillance</h2>
+      <p class="subtitle">Transforming existing camera infrastructure into proactive, real-time life-saving sentinels:</p>
+      <div class="grid-3">
+        <div class="card">
+          <span class="badge badge-success">Proactive</span>
+          <div class="card-title">Immediate Visual Discovery</div>
+          <div class="card-text">Detects visible flames at the moment of ignition—eliminating the wait for smoke convection.</div>
+        </div>
+        <div class="card">
+          <span class="badge badge-success">Cost-Effective</span>
+          <div class="card-title">Hardware-Agnostic Ingestion</div>
+          <div class="card-text">Connects instantly to existing security infrastructure: standard RTSP IP cameras, CCTV streams, and USB webcams.</div>
+        </div>
+        <div class="card">
+          <span class="badge badge-success">Actionable</span>
+          <div class="card-title">Instant Visual Evidence</div>
+          <div class="card-text">Sends high-definition snapshot evidence to the security control room and directly to responders' phones via Telegram.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 4: System Architecture -->
+    <div class="slide" data-notes="Walk through the 4-stage pipeline: Video Ingest -> Deep Learning Inference -> Policy Verification -> Dispatch.">
+      <div class="tagline">Engineering Architecture</div>
+      <h2>End-to-End System Architecture</h2>
+      <div class="diagram-box">
+[ Video Cameras ] ────► [ OpenCV Ingestion Engine ] ────► [ Asynchronous Frame Buffer ]
+(RTSP / Webcams)        (Auto-reconnect & sampling)
+                                                                 │
+                                                                 ▼
+[ Multi-Target Dispatch ] ◄─── [ Detection Policy Filter ] ◄─── [ Ultralytics YOLOv8 ]
+ ├── WebSockets (Live Siren)    ├── Polygon ROI Check            (Real-Time Inference)
+ ├── Telegram Bot (Photo Alert) ├── Consecutive Frame Count
+ ├── SMTP Email Dispatch        └── Alarm Cooldown Timer
+ └── SQLite WAL (Audit Records)
+      </div>
+      <p class="subtitle" style="margin-top: 16px; margin-bottom: 0;">Designed with non-blocking threads to ensure reliable, high-throughput surveillance across multiple cameras simultaneously.</p>
+    </div>
+
+    <!-- Slide 5: False-Positive Prevention -->
+    <div class="slide" data-notes="Explain the 3 layers of verification: Polygon ROI, Consecutive Frame Persistence, and Cooldown timers.">
+      <div class="tagline">Smart AI Policy</div>
+      <h2>Eliminating False Alarms: The Policy Engine</h2>
+      <p class="subtitle">A multi-stage software verification gate ensures alarms are genuine before sounding alerts:</p>
+      <div class="grid-3">
+        <div class="card">
+          <div class="card-icon">📐</div>
+          <div class="card-title">Polygon ROI Masking</div>
+          <div class="card-text">Security operators draw arbitrary polygon zones per camera. Detected fire outside the polygon (e.g., stovetop or window reflection) is filtered out.</div>
+        </div>
+        <div class="card">
+          <div class="card-icon">🔄</div>
+          <div class="card-title">Consecutive Frame Persistence</div>
+          <div class="card-text">Flames must be continuously detected across N consecutive processed frames. Light flickers, camera sensor noise, and reflections never trigger alarms.</div>
+        </div>
+        <div class="card">
+          <div class="card-icon">⏱️</div>
+          <div class="card-title">Intelligent Cooldown</div>
+          <div class="card-text">Configurable cooldown timers throttle repeat alerts for ongoing fires, preventing notification fatigue and keeping channels clear.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 6: Frontend Experience -->
+    <div class="slide" data-notes="Showcase the UI features: interactive multi-camera grid, polygon drawing tools, live audio siren, and audit logs.">
+      <div class="tagline">Operator Interface</div>
+      <h2>High-Performance Command & Control UI</h2>
+      <p class="subtitle">Designed in Next.js & Tailwind CSS for high-stress security monitoring environments:</p>
+      <div class="grid-4">
+        <div class="card">
+          <div class="card-title">Multi-Camera Grid</div>
+          <div class="card-text">Real-time status badges (Connected, Reconnecting, Disconnected) with low-latency MJPEG streaming.</div>
+        </div>
+        <div class="card">
+          <div class="card-title">Live Siren & Push</div>
+          <div class="card-text">Instant WebSocket banners and locally synthesized audio sirens without CDN or external dependencies.</div>
+        </div>
+        <div class="card">
+          <div class="card-title">Audit Log & CSV</div>
+          <div class="card-text">Historical incident search with date/confidence filters, HD snapshot inspection, and CSV export.</div>
+        </div>
+        <div class="card">
+          <div class="card-title">Diagnostic Studio</div>
+          <div class="card-text">Upload standalone image files to test model confidence and bounding boxes without tripping building alarms.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 7: Tech Stack -->
+    <div class="slide" data-notes="Explain the technology selection and why FastAPI, YOLOv8, SQLite WAL, and Next.js were chosen.">
+      <div class="tagline">Under The Hood</div>
+      <h2>Production-Ready Technology Stack</h2>
+      <div class="grid-3">
+        <div class="card">
+          <span class="badge badge-info">AI & Computer Vision</span>
+          <div class="card-title">YOLOv8 + OpenCV</div>
+          <ul style="margin-left: 18px; color: var(--text-muted); font-size: 0.95rem; line-height: 1.6;">
+            <li>Ultralytics YOLOv8 PyTorch model</li>
+            <li>Multi-threaded OpenCV capture</li>
+            <li>Dynamic confidence & IoU thresholding</li>
+            <li>Fast multi-camera frame sampling</li>
+          </ul>
+        </div>
+        <div class="card">
+          <span class="badge badge-info">Backend Architecture</span>
+          <div class="card-title">FastAPI + SQLite WAL</div>
+          <ul style="margin-left: 18px; color: var(--text-muted); font-size: 0.95rem; line-height: 1.6;">
+            <li>Python 3.10+ asynchronous API</li>
+            <li>Real-time WebSocket event broadcaster</li>
+            <li>Thread-safe SQLite with WAL logging</li>
+            <li>Telegram Bot API & SMTP notifications</li>
+          </ul>
+        </div>
+        <div class="card">
+          <span class="badge badge-info">Frontend & UX</span>
+          <div class="card-title">Next.js + Tailwind</div>
+          <ul style="margin-left: 18px; color: var(--text-muted); font-size: 0.95rem; line-height: 1.6;">
+            <li>React 19 & TypeScript</li>
+            <li>Recharts analytics trendlines</li>
+            <li>Interactive SVG polygon drawing canvas</li>
+            <li>Modern dark-mode surveillance styling</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 8: Resilience & Telemetry -->
+    <div class="slide" data-notes="Emphasize resilience: auto-healing camera connections, isolated failure handling, and measured telemetry.">
+      <div class="tagline">Reliability Engineering</div>
+      <h2>Designed for 24/7 Uninterrupted Operation</h2>
+      <p class="subtitle">Built to survive real-world network hiccups and power fluctuations:</p>
+      <div class="grid-3">
+        <div class="card">
+          <div class="card-title">Auto-Healing Streams</div>
+          <div class="card-text">If a network camera drops, background threads safely attempt reconnection every 10 seconds without blocking other camera feeds.</div>
+        </div>
+        <div class="card">
+          <div class="card-title">Isolated Error Containment</div>
+          <div class="card-text">A corruption in one camera feed or a model inference hiccup cannot crash other camera pipelines.</div>
+        </div>
+        <div class="card">
+          <div class="card-title">Real-Time Telemetry</div>
+          <div class="card-text">Live metrics tracked per camera: processing FPS, inference latency in milliseconds, and total processed frames.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 9: Future Roadmap -->
+    <div class="slide" data-notes="Discuss the future development roadmap including smoke detection, propagation tracking, and edge AI chips.">
+      <div class="tagline">Future Scope</div>
+      <h2>Future Roadmap & Next Steps</h2>
+      <div class="grid-4">
+        <div class="card">
+          <div class="card-icon">🌫️</div>
+          <div class="card-title">Dual Smoke Model</div>
+          <div class="card-text">Training on curated multi-class datasets (e.g. DFireDataset) to identify early white/grey smoke plumes.</div>
+        </div>
+        <div class="card">
+          <div class="card-icon">📈</div>
+          <div class="card-title">Propagation Tracking</div>
+          <div class="card-text">ByteTrack / DeepSORT tracking to measure fire surface area expansion rates and spread direction.</div>
+        </div>
+        <div class="card">
+          <div class="card-icon">💻</div>
+          <div class="card-title">Edge AI Optimization</div>
+          <div class="card-text">Exporting to TensorRT & ONNX for deployment on NVIDIA Jetson microcomputers and Raspberry Pi 5.</div>
+        </div>
+        <div class="card">
+          <div class="card-icon">🚒</div>
+          <div class="card-title">Autonomous Dispatch</div>
+          <div class="card-text">IoT relay triggers for smart fire sprinklers and direct automated 911 / 112 emergency calls.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 10: Conclusion -->
+    <div class="slide" data-notes="Summarize the core impact: saving seconds when seconds save lives. Open floor for questions.">
+      <div class="tagline">Summary</div>
+      <h1>Saving Seconds When Seconds Save Lives</h1>
+      <p class="subtitle">Fire Guard AI replaces slow, blind smoke alarms with intelligent, visual, sub-second hazard detection.</p>
+      <div class="grid-2" style="max-width: 800px; margin-top: 10px;">
+        <div class="card">
+          <div class="card-title">🌐 Live Demo Available</div>
+          <div class="card-text"><a href="https://ai-fire-detection-drab.vercel.app/" target="_blank" style="color: var(--blue); text-decoration: underline;">ai-fire-detection-drab.vercel.app</a></div>
+        </div>
+        <div class="card">
+          <div class="card-title">💬 Open for Questions</div>
+          <div class="card-text">Thank you for your time. Let's begin the Q&A and demo session.</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Bottom Navigation Bar -->
+  <div class="bottom-bar">
+    <div class="speaker-notes-drawer" id="speaker-notes">
+      <strong>Speaker Note:</strong> <span>Welcome the audience...</span>
+    </div>
+    <div class="controls">
+      <button class="btn" id="prevBtn" onclick="prevSlide()">◀ Previous</button>
+      <button class="btn btn-primary" id="nextBtn" onclick="nextSlide()">Next ▶</button>
+    </div>
+  </div>
+
+  <script>
+    const slides = document.querySelectorAll('.slide');
+    const counter = document.getElementById('counter');
+    const speakerNotesSpan = document.querySelector('#speaker-notes span');
+    let currentIndex = 0;
+
+    function updateSlide(index) {
+      slides.forEach((slide, i) => {
+        slide.classList.toggle('active', i === index);
+      });
+      currentIndex = index;
+      counter.textContent = `Slide ${currentIndex + 1} / ${slides.length}`;
+      speakerNotesSpan.textContent = slides[currentIndex].getAttribute('data-notes') || 'None';
+    }
+
+    function nextSlide() {
+      if (currentIndex < slides.length - 1) {
+        updateSlide(currentIndex + 1);
+      }
+    }
+
+    function prevSlide() {
+      if (currentIndex > 0) {
+        updateSlide(currentIndex - 1);
+      }
+    }
+
+    // Keyboard Navigation
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'Enter') {
+        nextSlide();
+      } else if (e.key === 'ArrowLeft') {
+        prevSlide();
+      } else if (e.key === 'f' || e.key === 'F') {
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen();
+        } else {
+          document.exitFullscreen();
+        }
+      }
+    });
+
+    // Initialize first slide notes
+    updateSlide(0);
+  </script>
+</body>
+</html>
